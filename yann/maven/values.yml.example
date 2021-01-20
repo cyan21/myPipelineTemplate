@@ -1,6 +1,6 @@
 # INPUT 
 MvnPromoteRepo: ninja-rc-mvn-local
-EdgeUrl: http://edge-us-yannc4-0.soleng-emea-staging.jfrog.team:80
+EdgeUrl: 'http://edge-us-yannc4-0.soleng-emea-staging.jfrog.team:80'
 
 ArtifactoryIntegration: artifactory_eu
 
@@ -58,10 +58,10 @@ Pipeline:
 MvnBuild:
   stepName: build_backapp_mvn
   goals: "clean package"
-  sourceLocation:       complete/  #required
-  configFileLocation:   CI  #required
-  configFileName:       mvn-art-config  #required
-  forceXrayScan:        false #optional
+  sourceLocation:       complete/
+  configFileLocation:   CI
+  configFileName:       mvn-art-config
+  forceXrayScan:        false
   autoPublishBuildInfo: true
   
 Image:
