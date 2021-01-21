@@ -45,14 +45,14 @@ resources:
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
       buildName: {{ .Values.BuildInfoContainer.name | default "backapp_mvn_oci" }}
-      buildNumber: ${run_number}
+      buildNumber: ${runVarBINumber}
 
   - name: {{ .Values.BuildInfoContainerPromotion.resourceName | default "bi_backapp_mvn_oci_promoted_staging" }}
     type: BuildInfo
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
       buildName: {{ .Values.BuildInfoContainer.name | default "backapp_mvn_oci" }}
-      buildNumber: ${run_number}
+      buildNumber: ${runVarBINumber}
 
   - name: {{ .Values.FileSpecMvn.name | default "fs_backapp_mvn" }} 
     type: FileSpec
@@ -150,6 +150,7 @@ pipelines:
       #       - sudo cat /etc/docker/daemon.json
             - add_run_variables runVarAppVersion=${res_{{ .Values.PropertyBagMvn }}_appVersion}
             - add_run_variables runVarAppCommitSHA=${res_{{ .Values.PropertyBagMvn }}_appCommitSHA}
+            - add_run_variables runVarBINumber=${res_{{ .Values.PropertyBagMvn }}_biNumber}
       - name: {{ .Values.OCIBuild.stepName | default "backapp_mvn_oci" }} 
         type: oci/PodmanBuild
         configuration:
@@ -189,6 +190,8 @@ pipelines:
           onSuccess:
             - echo "{{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json"
             - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
+            - write_output {{ .Values.BuildInfoContainer.resourceName }} configuration.buildNumber=${runVarAppVersion}
+
       - name: {{ .Values.BuildInfoContainerPromotion.resourceName }}
         type: PromoteBuild
         configuration:
