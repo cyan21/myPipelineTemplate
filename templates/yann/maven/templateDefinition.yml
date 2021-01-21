@@ -87,7 +87,8 @@ pipelines:
         execution:
           onStart:
               - echo {{ .Values.BuildInfoMvn.resourceName }}
-              - echo ${res_{{ .Values.BuildInfoMvn.resourceName }}_resourcePath}"
+              - echo "${res_{{ .Values.BuildInfoMvn.resourceName }}_resourcePath}"
+              - echo "${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=${res_{{ .Values.GitRepoMvn.name }}_branchName}"
 #             - export JFROG_CLI_BUILD_URL="${int_artifactory_eu_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=${res_src_code_backapp_mvn_branchName}"
 #             - cd ${res_src_code_backapp_mvn_resourcePath}/complete/CI/jfrog
 #             - ls -l && chmod +x init_mvn.sh
