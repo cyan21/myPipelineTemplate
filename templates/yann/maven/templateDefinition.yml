@@ -47,7 +47,7 @@ resources:
       buildName: {{ .Values.BuildInfoContainer.name | default "backapp_mvn_docker" }}
       buildNumber: '${run_number}'
 
-  - name: bi_backapp_mvn_docker_promoted_staging
+  - name: {{ .Values.BuildInfoContainerPromotion.resourceName | default "bi_backapp_mvn_oci_promoted_staging" }}
     type: BuildInfo
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
