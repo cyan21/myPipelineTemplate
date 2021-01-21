@@ -18,7 +18,7 @@ resources:
       buildName: {{ .Values.BuildInfoMvn.name | default "BuildInfoMvn" }}
       buildNumber: ${run_number}
 
-  - name: {{ .Values.BuildInfoMvnPromoted.resourceName | default "bi_backapp_mvn_promoted_staging" }} 
+  - name: {{ .Values.BuildInfoMvnPromotion.resourceName | default "bi_backapp_mvn_promoted_staging" }} 
     type: BuildInfo
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
@@ -81,14 +81,11 @@ pipelines:
           inputResources:
             - name: {{ .Values.GitRepoMvn.name }} 
           outputResources:
-            - name: {{ .Values.BuildInfoMvn.resourceName }} 
+            - name: {{ .Values.BuildInfoMvn.resourceName }}
           integrations:
             - name: {{ .Values.ArtifactoryIntegration }}
         execution:
           onStart:
-            #   - echo {{ .Values.BuildInfoMvn.resourceName }}
-            #   - echo "${res_{{ .Values.BuildInfoMvn.resourceName }}_resourcePath}"
-            #   - echo "${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=${res_{{ .Values.GitRepoMvn.name }}_branchName}"
             - export JFROG_CLI_BUILD_URL="${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=${res_{{ .Values.GitRepoMvn.name }}_branchName}"
             - cd ${res_{{ .Values.GitRepoMvn.name }}_resourcePath}/complete/CI/jfrog
             - ls -l && chmod +x init_mvn.sh
@@ -108,27 +105,27 @@ pipelines:
             - name: {{ .Values.BuildInfoMvn.resourceName }}
               trigger: true
             
-      # - name: promote_bi_backapp_mvn
-      #   type: PromoteBuild
-      #   configuration:
-      #     targetRepository: ${envVarMvnPromoteRepo}
-      #     includeDependencies: false
-      #     status: SANDBOX_OK
-      #     comment: Unit testing and Xray scan passed succesfully
-      #     copy: false
-      #     inputResources:
-      #       - name: bi_backapp_mvn
-      #         trigger: true
-      #     inputSteps:
-      #       - name: scan_backapp_mvn
-      #     outputResources:
-      #       - name: pb_backapp_mvn            
-      #       - name: bi_backapp_mvn_promoted_staging
-      #   execution:  
-      #     onStart:
-      #       - echo ${res_bi_backapp_mvn_buildName} 
-      #       - echo ${res_bi_backapp_mvn_buildNumber} 
-      #     onSuccess:
-      #       - write_output pb_backapp_mvn appVersion=${runVarAppVersion}
-      #       - write_output pb_backapp_mvn appCommitSHA=${runVarGitCommit}
-      #       - write_output pb_backapp_mvn biNumber=${res_bi_backapp_mvn_buildNumber}
+      - name: {{ .Values.BuildInfoMvnPromotion.resourceName }}
+        type: PromoteBuild
+        configuration:
+          targetRepository: {{ .Values.BuildInfoMvnPromotion.mvnPromoteRepo }} 
+          includeDependencies: {{ .Values.BuildInfoMvnPromotion.includeDependencies }}
+          status: {{ .Values.BuildInfoMvnPromotion.status }}
+          comment: {{ .Values.BuildInfoMvnPromotion.comment }}
+          copy: {{ .Values.BuildInfoMvnPromotion.copy }}
+          inputResources:
+            - name: {{ .Values.BuildInfoMvn.resourceName }}
+              trigger: true
+          inputSteps:
+            - name: {{ .Values.XrayMvnStepName }}
+          outputResources:
+            - name: {{ .Values.PropertyBagMvn }}            
+            - name: {{ .Values.BuildInfoMvnPromotion.resourceName }}
+        execution:  
+          onStart:
+            - echo ${res_{{ .Values.BuildInfoMvn.resourceName }}_buildName} 
+            - echo ${res_{{ .Values.BuildInfoMvn.resourceName }}_buildNumber} 
+          onSuccess:
+            - write_output {{ .Values.PropertyBagMvn }} appVersion=${runVarAppVersion}
+            - write_output {{ .Values.PropertyBagMvn }} appCommitSHA=${runVarGitCommit}
+            - write_output {{ .Values.PropertyBagMvn }} biNumber=${res_{{ .Values.BuildInfoMvn.resourceName }}_buildNumber}
