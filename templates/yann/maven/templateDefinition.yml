@@ -172,7 +172,7 @@ pipelines:
           pushImage: {{ .Values.OCIBuild.pushImage }}
           artifactoryTargetRepoName: {{ .Values.OCIBuild.artifactoryTargetRepoName }}
           buildName: "${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}"
-          buildNumber: ${res_{{ .Values.BuildInfoContainer.resourceName }}_buildNumber} | atoi
+          buildNumber: ${res_{{ .Values.BuildInfoContainer.resourceName }}_buildNumber} 
           buildDependency: ${res_{{ .Values.BuildInfoContainer.resourceName }}_pattern}
           inputResources:
             - name: {{ .Values.PropertyBagMvn }}
