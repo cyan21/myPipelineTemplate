@@ -23,7 +23,7 @@ resources:
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
       buildName: {{ .Values.BuildInfoMvn.name | default "BuildInfoMvn" }}
-      buildNumber: '${run_number}'
+      buildNumber: ${run_number}
 
   - name: {{ .Values.PropertyBagMvn | default "pb_backapp_mvn" }}  
     type: PropertyBag
@@ -40,19 +40,19 @@ resources:
       files:
         include: {{ .Values.GitRepoContainer.files.include }}      
 
-  - name: {{ .Values.BuildInfoContainer.resourceName | default "bi_backapp_mvn_docker" }}
+  - name: {{ .Values.BuildInfoContainer.resourceName | default "bi_backapp_mvn_oci" }}
     type: BuildInfo
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
-      buildName: {{ .Values.BuildInfoContainer.name | default "backapp_mvn_docker" }}
-      buildNumber: '${run_number}'
+      buildName: {{ .Values.BuildInfoContainer.name | default "backapp_mvn_oci" }}
+      buildNumber: ${run_number}
 
   - name: {{ .Values.BuildInfoContainerPromotion.resourceName | default "bi_backapp_mvn_oci_promoted_staging" }}
     type: BuildInfo
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
-      buildName: {{ .Values.BuildInfoContainer.name | default "backapp_mvn_docker" }}
-      buildNumber: '${run_number}'
+      buildName: {{ .Values.BuildInfoContainer.name | default "backapp_mvn_oci" }}
+      buildNumber: ${run_number}
 
   - name: {{ .Values.FileSpecMvn.name | default "fs_backapp_mvn" }} 
     type: FileSpec
@@ -62,7 +62,7 @@ resources:
 #      pattern: "{{ .Values.MvnPromoteRepo }}/**/{{ .Values.FileSpecMvn.appName }}-${res_{{ .Values.PropertyBagContainer }}_appVersion}.jar"
       flat: {{ .Values.FileSpecMvn.flat | default true }}
 
-  - name: {{ .Values.PropertyBagContainer | default "pb_backapp_mvn_docker" }}  
+  - name: {{ .Values.PropertyBagContainer | default "pb_backapp_mvn_oci" }}  
     type: PropertyBag
     configuration:   
       appVersion: X.X.X
