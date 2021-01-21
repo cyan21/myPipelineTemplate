@@ -89,7 +89,7 @@ BuildInfoContainerPromoted:
 
 FileSpecMvn:
   name: fs_backapp_mvn
-  pattern:
+  appName: multi-module-application 
   flat: true
 
 PropertyBagContainer: pb_backapp_mvn_docker

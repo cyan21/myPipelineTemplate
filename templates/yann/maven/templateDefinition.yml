@@ -58,7 +58,7 @@ resources:
     type: FileSpec
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
-      pattern: "{{ .Values.MvnPromoteRepo }}/**/multi-module-application-${runVarAppVersion}.jar"
+      pattern: "{{ .Values.MvnPromoteRepo }}/**/{{ .Values.FileSpecMvn.appName }}-${runVarAppVersion}.jar"
       flat: {{ .Values.FileSpecMvn.flat | default true }}
 
   - name: {{ .Values.PropertyBagContainer | default "pb_backapp_mvn_docker" }}  
