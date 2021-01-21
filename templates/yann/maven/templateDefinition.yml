@@ -18,7 +18,7 @@ resources:
       buildName: {{ .Values.BuildInfoMvn.name | default "BuildInfoMvn" }}
       buildNumber: ${run_number}
 
-  - name: {{ .Values.BuildInfoMvn.resourceName | default "bi_backapp_mvn_promoted_staging" }} 
+  - name: {{ .Values.BuildInfoMvnPromoted.resourceName | default "bi_backapp_mvn_promoted_staging" }} 
     type: BuildInfo
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
