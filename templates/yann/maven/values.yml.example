@@ -1,8 +1,24 @@
-# INPUT 
+##########################################
+## INPUT 
+##########################################
+
 MvnPromoteRepo: ninja-rc-mvn-local
+MvnRepo: ninja-dev-mvn
 EdgeUrl: 'http://edge-us-yannc4-0.soleng-emea-staging.jfrog.team:80'
 
+##########################################
+## GLOBAL 
+##########################################
+
 ArtifactoryIntegration: artifactory_eu
+
+Pipeline:
+  mvnNname: backapp_mvn
+  mvnContainerName: backapp_mvn_docker
+
+##########################################
+## MVN Pipeline
+##########################################
 
 GitRepoMvn:
   name: src_code_backapp_mvn
@@ -10,50 +26,10 @@ GitRepoMvn:
   path: cyan21/gs-multi-module
   branches:
     exclude: 'master'
-    include: 'jfrog-ode'
+    include: 'jfrog'
   files:
     exclude: '^complete\/CI\/.+'
     include: '^complete\/.+'
-
-GitRepoContainer:
-  name: src_dockerfile_backapp_mvn
-  gitProvider: yann_github
-  path: cyan21/gs-multi-module
-  branches:
-    exclude: 'master'
-    include: 'jfrog-ode'
-  files:
-    include: '^complete\/CI\/Docker\/.+'
-
-BuildInfoMvn:
-  resourceName: bi_backapp_mvn
-  name: backapp_mvn
-  autoPublishBuildInfo: true
-
-BuildInfoMvnPromoted:
-  resourceName: bi_backapp_mvn_promoted_staging
-
-BuildInfoContainer:
-  resourceName: bi_backapp_mvn_docker
-  name: backapp_mvn_docker
-  autoPublishBuildInfo: true
-
-BuildInfoContainerPromoted:
-  resourceName: bi_backapp_mvn_docker_promoted_staging
-
-PropertyBagMvn: pb_backapp_mvn
-
-PropertyBagContainer: pb_backapp_mvn_docker
-
-FileSpecMvn:
-  name: fs_backapp_mvn
-  pattern:
-  flat: true
-
-Pipeline:
-  mvnNname: backapp_mvn
-  mvnContainerName: backapp_mvn_docker
-
 
 MvnBuild:
   stepName: build_backapp_mvn
@@ -63,24 +39,46 @@ MvnBuild:
   configFileName:       mvn-art-config
   forceXrayScan:        false
   autoPublishBuildInfo: true
-  
+
 XrayMvnStepName: scan_backapp_mvn
 
-Image:
-  name: fooImage
-  sourceRepository: foo
-  dockerImageName: foo
-  autoPull: false
- 
-DockerBuild:
-  name: foobuild
-  dockerImageName: foo
-  dockerFileName: foo
-  dockerFileLocation: '.'
-  dockerImageTag: ${run_number}
- 
- 
-DockerPush:
-  name: foopush
-  targetRepository: foo
- 
+BuildInfoMvn:
+  resourceName: bi_backapp_mvn
+  name: backapp_mvn
+  autoPublishBuildInfo: true
+
+BuildInfoMvnPromoted:
+  resourceName: bi_backapp_mvn_promoted_staging
+
+PropertyBagMvn: pb_backapp_mvn
+
+##########################################
+## DOCKER PIPELINE
+##########################################
+
+GitRepoContainer:
+  name: src_dockerfile_backapp_mvn
+  gitProvider: yann_github
+  path: cyan21/gs-multi-module
+  branches:
+    exclude: 'master'
+    include: 'jfrog'
+  files:
+    include: '^complete\/CI\/Docker\/.+'
+
+BuildInfoContainer:
+  resourceName: bi_backapp_mvn_docker
+  name: backapp_mvn_docker
+  autoPublishBuildInfo: true
+
+BuildInfoContainerPromoted:
+  resourceName: bi_backapp_mvn_docker_promoted_staging
+
+FileSpecMvn:
+  name: fs_backapp_mvn
+  pattern:
+  flat: true
+
+PropertyBagContainer: pb_backapp_mvn_docker
+
+XrayMvnContainerStepName: scan_backapp_mvn_docker
