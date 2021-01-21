@@ -45,14 +45,16 @@ resources:
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
       buildName: {{ .Values.BuildInfoContainer.name | default "backapp_mvn_oci" }}
-      buildNumber: ${runVarBINumber}
+#      buildNumber: ${runVarBINumber}
+      buildNumber: "${run_number}"
 
   - name: {{ .Values.BuildInfoContainerPromotion.resourceName | default "bi_backapp_mvn_oci_promoted_staging" }}
     type: BuildInfo
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
       buildName: {{ .Values.BuildInfoContainer.name | default "backapp_mvn_oci" }}
-      buildNumber: ${runVarBINumber}
+#      buildNumber: ${runVarBINumber}
+      buildNumber: "${run_number}"
 
   - name: {{ .Values.FileSpecMvn.name | default "fs_backapp_mvn" }} 
     type: FileSpec
@@ -166,7 +168,8 @@ pipelines:
           pushImage: {{ .Values.OCIBuild.pushImage }}
           artifactoryTargetRepoName: {{ .Values.OCIBuild.artifactoryTargetRepoName }}
           buildName: "${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}"
-          buildNumber: ${runVarBINumber}
+          buildNumber: "${run_number}"
+#        buildNumber: ${runVarBINumber}
           #         buildNumber: ${res_{{ .Values.BuildInfoContainer.resourceName }}_buildNumber} 
           buildDependency: ${res_{{ .Values.BuildInfoContainer.resourceName }}_pattern}
           inputResources:
@@ -191,7 +194,6 @@ pipelines:
           onSuccess:
             - echo "{{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json"
             - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
-            - write_output {{ .Values.BuildInfoContainer.resourceName }} configuration.buildNumber=${runVarBINumber}
 
       - name: {{ .Values.BuildInfoContainerPromotion.resourceName }}
         type: PromoteBuild
