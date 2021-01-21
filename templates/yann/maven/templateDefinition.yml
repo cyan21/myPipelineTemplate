@@ -58,7 +58,7 @@ resources:
     configuration:
       sourceArtifactory: {{ .Values.ArtifactoryIntegration }}
       pattern: "{{ .Values.MvnPromoteRepo }}/**/multi-module-application-${runVarAppVersion}.jar"
-      flat: {{ .Values.FileSpecMvn.flat | default 'true' }}
+      flat: {{ .Values.FileSpecMvn.flat | default true }}
 
   - name: {{ .Values.PropertyBagMvn | default "pb_backapp_mvn_docker" }}  
     type: PropertyBag
@@ -71,27 +71,27 @@ resources:
             - name: {{ .Values.BuildInfoMvn.resourceName }}  
               trigger: true
             
-      - name: promote_bi_backapp_mvn
-        type: PromoteBuild
-        configuration:
-          targetRepository: ${envVarMvnPromoteRepo}
-          includeDependencies: false
-          status: SANDBOX_OK
-          comment: Unit testing and Xray scan passed succesfully
-          copy: false
-          inputResources:
-            - name: bi_backapp_mvn
-              trigger: true
-          inputSteps:
-            - name: scan_backapp_mvn
-          outputResources:
-            - name: pb_backapp_mvn            
-            - name: bi_backapp_mvn_promoted_staging
-        execution:  
-          onStart:
-            - echo ${res_bi_backapp_mvn_buildName} 
-            - echo ${res_bi_backapp_mvn_buildNumber} 
-          onSuccess:
-            - write_output pb_backapp_mvn appVersion=${runVarAppVersion}
-            - write_output pb_backapp_mvn appCommitSHA=${runVarGitCommit}
-            - write_output pb_backapp_mvn biNumber=${res_bi_backapp_mvn_buildNumber}
+      # - name: promote_bi_backapp_mvn
+      #   type: PromoteBuild
+      #   configuration:
+      #     targetRepository: ${envVarMvnPromoteRepo}
+      #     includeDependencies: false
+      #     status: SANDBOX_OK
+      #     comment: Unit testing and Xray scan passed succesfully
+      #     copy: false
+      #     inputResources:
+      #       - name: bi_backapp_mvn
+      #         trigger: true
+      #     inputSteps:
+      #       - name: scan_backapp_mvn
+      #     outputResources:
+      #       - name: pb_backapp_mvn            
+      #       - name: bi_backapp_mvn_promoted_staging
+      #   execution:  
+      #     onStart:
+      #       - echo ${res_bi_backapp_mvn_buildName} 
+      #       - echo ${res_bi_backapp_mvn_buildNumber} 
+      #     onSuccess:
+      #       - write_output pb_backapp_mvn appVersion=${runVarAppVersion}
+      #       - write_output pb_backapp_mvn appCommitSHA=${runVarGitCommit}
+      #       - write_output pb_backapp_mvn biNumber=${res_bi_backapp_mvn_buildNumber}
