@@ -177,6 +177,7 @@ pipelines:
           buildDependency: ${res_{{ .Values.BuildInfoContainer.resourceName }}_pattern}
           inputResources:
             - name: {{ .Values.GitRepoContainer.name }} 
+            - name: {{ .Values.FileSpecMvn.name }}
           inputSteps:
             - name: setup_env
           integrations:
