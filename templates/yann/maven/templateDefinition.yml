@@ -28,6 +28,7 @@ resources:
   - name: {{ .Values.PropertyBagMvn | default "pb_backapp_mvn" }}  
     type: PropertyBag
     configuration:
+      appVersion: X.X.X
 
   - name: {{ .Values.GitRepoContainer.name | default "src_dockerfile_backapp_mvn" }}
     type: GitRepo
@@ -60,20 +61,13 @@ resources:
       pattern: "{{ .Values.MvnPromoteRepo }}/**/multi-module-application-${runVarAppVersion}.jar"
       flat: {{ .Values.FileSpecMvn.flat | default true }}
 
-  - name: {{ .Values.PropertyBagMvn | default "pb_backapp_mvn_docker" }}  
+  - name: {{ .Values.PropertyBagContainer | default "pb_backapp_mvn_docker" }}  
     type: PropertyBag
     configuration:   
-      - name: scan_backapp_mvn
-        type: XrayScan
-        configuration:
-          failOnScan: false
-          inputResources:
-            - name: {{ .Values.BuildInfoMvn.resourceName }}  
-              trigger: true
+      appVersion: X.X.X
 
 pipelines:
   - name: {{ .Values.Pipeline.mvnNname }} 
-    configuration:
     steps:
       - name: {{ .Values.MvnBuild.stepName }} 
         type: MvnBuild
