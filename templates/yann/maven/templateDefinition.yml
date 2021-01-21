@@ -129,3 +129,107 @@ pipelines:
             - write_output {{ .Values.PropertyBagMvn }} appVersion=${runVarAppVersion}
             - write_output {{ .Values.PropertyBagMvn }} appCommitSHA=${runVarGitCommit}
             - write_output {{ .Values.PropertyBagMvn }} biNumber=${res_{{ .Values.BuildInfoMvn.resourceName }}_buildNumber}
+
+  - name: {{ .Values.Pipeline.mvnNname }} 
+    configuration:
+      environmentVariables:
+        readOnly:
+          envVarDockerRepoUrl: ninja-dev-docker.artifactory-eu-yannc4-0.soleng-emea-staging.jfrog.team:80
+          envVarDockerPushRepo: ninja-dev-docker
+#          envVarDockerImageName: yannaws-ninja-dev-docker.jfrog.io/backapp-mvn
+          envVarDockerImageName: ${envVarDockerRepoUrl}/backapp-mvn
+          envVarDockerPromoteRepo: ninja-rc-docker-local
+    steps:
+      # - name: setup_env
+      #   type: Bash
+      #   configuration:
+      #     affinityGroup: together
+      #     runtime:
+      #       type: host
+      #     inputResources:
+      #       - name: {{ .Values.PropertyBagMvn }}
+      #   execution:
+      #     onExecute:
+      #       - sudo mkdir -p /etc/docker 
+      #       - > 
+      #         sudo jq -n  "{\"insecure-registries\": [\"${envVarDockerRepoUrl}\"]}" > /etc/docker/daemon.json
+      #       - sudo systemctl restart docker
+      #       - sudo cat /etc/docker/daemon.json
+      #       - add_run_variables runVarAppVersion=${res_{{ .Values.PropertyBagMvn }}_appVersion}
+      #       - add_run_variables runVarAppCommitSHA=${res_{{ .Values.PropertyBagMvn }}_appCommitSHA}
+      - name: {{ .Values.OCIBuild.stepName | default "backapp_mvn_oci" }} 
+        type: oci/PodmanBuild
+        configuration:
+          affinityGroup: together
+          environmentVariables:
+            JFROG_CLI_LOG_LEVEL: DEBUG
+          runtime:
+            type: host
+          dockerFileName: {{ .Values.OCIBuild.dockerFileName }}
+          dockerFileLocation: {{ .Values.OCIBuild.dockerFileName }}
+          ociImageName: {{ .Values.OCIBuild.imageName }}
+          ociImageTag: ${runVarAppVersion}
+          pushImage: {{ .Values.OCIBuild.pushImage }}
+          artifactoryTargetRepoName: {{ .Values.OCIBuild.artifactoryTargetRepoName }}
+          buildName: "${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}"
+          buildNumber: ${res_{{ .Values.BuildInfoContainer.resourceName }}_buildNumber}
+          buildDependency: ${res_{{ .Values.BuildInfoContainer.resourceName }}_pattern}
+          inputResources:
+            - name: {{ .Values.PropertyBagMvn }}
+            - name: {{ .Values.FileSpecMvn.name }}
+          integrations:
+            - name: {{ .Values.ArtifactoryIntegration }}
+        execution:
+          onStart:
+            - add_run_variables runVarAppVersion=${res_{{ .Values.PropertyBagMvn }}_appVersion}
+            - add_run_variables runVarAppCommitSHA=${res_{{ .Values.PropertyBagMvn }}_appCommitSHA}    
+            - ls -la ${res_{{ .Values.FileSpecMvn.name }}_resourcePath}
+            - echo ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}
+            - ls -la  ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}
+            - cp ${res_{{ .Values.FileSpecMvn.name }}_resourcePath}/multi-module-application-${runVarAppVersion}.jar ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}/complete/CI/Docker/multi-module-application.jar
+            - ls -la ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}/complete/CI/Docker/
+            - add_run_variables runVarGitCommit=${res_{{ .Values.GitRepoContainer.name }}_commitSha}  
+          onSuccess:
+            - echo "{{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json"
+            - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
+
+      # - name: build_backapp_mvn_docker
+      #   type: DockerBuild
+      #   configuration:
+      #     affinityGroup: together
+      #     dockerFileName: Dockerfile
+      #     dockerFileLocation: complete/CI/Docker/
+      #     dockerImageName: ${envVarDockerImageName}
+      #     dockerImageTag: '${runVarAppVersion}'
+      #     dockerOptions: --build-arg JFROG_CLI_BUILD_URL=${int_artifactory_eu_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=jfrog-ode
+      #     inputSteps:
+      #       - name: setup_env
+      #     inputResources:
+      #       - name: src_dockerfile_backapp_mvn
+      #       - name: fs_backapp_mvn
+      #     integrations:
+      #       - name: artifactory_eu
+      #   execution:
+      #     onStart:
+      #       - ls -la ${res_fs_backapp_mvn_resourcePath}
+      #       - echo ${res_src_dockerfile_backapp_mvn_resourcePath}
+      #       - ls -la  ${res_src_dockerfile_backapp_mvn_resourcePath}
+      #       - cp ${res_fs_backapp_mvn_resourcePath}/multi-module-application-${runVarAppVersion}.jar ${res_src_dockerfile_backapp_mvn_resourcePath}/complete/CI/Docker/multi-module-application.jar
+      #       - ls -la ${res_src_dockerfile_backapp_mvn_resourcePath}/complete/CI/Docker/
+      #       - add_run_variables runVarGitCommit=${res_src_dockerfile_backapp_mvn_commitSha}
+      # - name: publish_backapp_mvn_docker
+        # type: DockerPush
+        # configuration:
+        #   affinityGroup: together
+        #   targetRepository: ${envVarDockerPushRepo}
+        #   autoPublishBuildInfo: true
+        #   inputSteps:
+        #     - name: build_backapp_mvn_docker
+        #   integrations:
+        #     - name: artifactory_eu
+        #   outputResources:
+        #     - name: bi_backapp_mvn_docker
+        # execution:
+        #   onSuccess:
+        #     - echo "${envVarDockerPushRepo}/backapp-mvn/${runVarAppVersion}/manifest.json"
+        #     - jfrog rt sp --build=${res_bi_backapp_mvn_docker_buildName}/${run_number} ${envVarDockerPushRepo}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
