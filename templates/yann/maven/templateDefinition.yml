@@ -89,7 +89,7 @@ pipelines:
             #   - echo {{ .Values.BuildInfoMvn.resourceName }}
             #   - echo "${res_{{ .Values.BuildInfoMvn.resourceName }}_resourcePath}"
             #   - echo "${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=${res_{{ .Values.GitRepoMvn.name }}_branchName}"
-            # - export JFROG_CLI_BUILD_URL="${int_artifactory_eu_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=${res_src_code_backapp_mvn_branchName}"
+            - export JFROG_CLI_BUILD_URL="${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=${res_{{ .Values.GitRepoMvn.name }}_branchName}"
             - cd ${res_{{ .Values.GitRepoMvn.name }}_resourcePath}/complete/CI/jfrog
             - ls -l && chmod +x init_mvn.sh
             - ./init_mvn.sh -u  ${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/} -p ${int_{{ .Values.ArtifactoryIntegration }}_apikey} -e "{{ .Values.EdgeUrl }}" -i {{ .Values.ArtifactoryIntegration }} -v {{ .Values.MvnRepo }}
