@@ -167,7 +167,7 @@ pipelines:
           runtime:
             type: host
           dockerFileName: {{ .Values.OCIBuild.dockerFileName }}
-          dockerFileLocation: {{ .Values.OCIBuild.dockerFileName }}
+          dockerFileLocation: {{ .Values.OCIBuild.dockerFileLocation }}
           ociImageName: {{ .Values.OCIBuild.imageName }}
           ociImageTag: ${runVarAppVersion}
           pushImage: {{ .Values.OCIBuild.pushImage }}
