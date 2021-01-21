@@ -64,6 +64,8 @@ MvnBuild:
   forceXrayScan:        false
   autoPublishBuildInfo: true
   
+XrayMvnStepName: scan_backapp_mvn
+
 Image:
   name: fooImage
   sourceRepository: foo
