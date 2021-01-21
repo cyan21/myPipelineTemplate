@@ -130,7 +130,7 @@ pipelines:
             - write_output {{ .Values.PropertyBagMvn }} appCommitSHA=${runVarGitCommit}
             - write_output {{ .Values.PropertyBagMvn }} biNumber=${res_{{ .Values.BuildInfoMvn.resourceName }}_buildNumber}
 
-  - name: {{ .Values.Pipeline.mvnNname }} 
+  - name: {{ .Values.Pipeline.mvnContainerName }} 
     configuration:
       environmentVariables:
         readOnly:
