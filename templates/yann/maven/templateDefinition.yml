@@ -120,7 +120,7 @@ pipelines:
           inputSteps:
             - name: {{ .Values.XrayMvnStepName }}
           outputResources:
-            - name: {{ .Values.PropertyBagMvn }}            
+            - name: {{ .Values.PropertyBagContainer }}            
             - name: {{ .Values.BuildInfoMvnPromotion.resourceName }}
         execution:  
           onStart:
@@ -132,14 +132,6 @@ pipelines:
             - write_output {{ .Values.PropertyBagMvn }} biNumber=${res_{{ .Values.BuildInfoMvn.resourceName }}_buildNumber}
 
   - name: {{ .Values.Pipeline.mvnContainerName }} 
-#     configuration:
-#       environmentVariables:
-#         readOnly:
-#           envVarDockerRepoUrl: ninja-dev-docker.artifactory-eu-yannc4-0.soleng-emea-staging.jfrog.team:80
-#           envVarDockerPushRepo: ninja-dev-docker
-# #          envVarDockerImageName: yannaws-ninja-dev-docker.jfrog.io/backapp-mvn
-#           envVarDockerImageName: ${envVarDockerRepoUrl}/backapp-mvn
-#           envVarDockerPromoteRepo: ninja-rc-docker-local
     steps:
       - name: setup_env
         type: Bash
@@ -178,6 +170,8 @@ pipelines:
           inputResources:
             - name: {{ .Values.GitRepoContainer.name }} 
             - name: {{ .Values.FileSpecMvn.name }}
+          outputResources:
+            - name: {{ .Values.BuildInfoContainer.resourceName }}
           inputSteps:
             - name: setup_env
           integrations:
@@ -195,6 +189,22 @@ pipelines:
           onSuccess:
             - echo "{{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json"
             - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
+      - name: {{ .Values.BuildInfoContainerPromotion.resourceName }}
+        type: PromoteBuild
+        configuration:
+          targetRepository: {{ .Values.BuildInfoContainerPromotion.mvnPromoteRepo }} 
+          includeDependencies: {{ .Values.BuildInfoContainerPromotion.includeDependencies }}
+          status: {{ .Values.BuildInfoContainerPromotion.status }}
+          comment: {{ .Values.BuildInfoContainerPromotion.comment }}
+          copy: {{ .Values.BuildInfoContainerPromotion.copy }}
+          inputResources:
+            - name: {{ .Values.BuildInfoContainer.resourceName }}
+          outputResources:
+            - name: {{ .Values.PropertyBagContainer }}            
+            - name: {{ .Values.BuildInfoContainerPromotion.resourceName }}
+        execution:  
+          onSuccess:
+            - write_output {{ .Values.PropertyBagContainer }} newTag=${runVarAppVersion}
 
       # - name: build_backapp_mvn_docker
       #   type: DockerBuild
