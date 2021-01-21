@@ -120,7 +120,7 @@ pipelines:
           inputSteps:
             - name: {{ .Values.XrayMvnStepName }}
           outputResources:
-            - name: {{ .Values.PropertyBagContainer }}            
+            - name: {{ .Values.PropertyBagMvn }}            
             - name: {{ .Values.BuildInfoMvnPromotion.resourceName }}
         execution:  
           onStart:
