@@ -181,6 +181,7 @@ pipelines:
             - name: {{ .Values.FileSpecMvn.name }}
           outputResources:
             - name: {{ .Values.BuildInfoContainer.resourceName }}
+            - name: {{ .Values.PropertyBagContainer }}
           inputSteps:
             - name: setup_env
           integrations:
@@ -262,8 +263,63 @@ pipelines:
           inputResources:
             - name: {{ .Values.BuildInfoContainer.resourceName }}
           outputResources:
-            - name: {{ .Values.PropertyBagContainer }}            
+            - name: {{ .Values.PropertyBagContainer }}
             - name: {{ .Values.BuildInfoContainerPromotion.resourceName }}
         execution:  
           onSuccess:
             - write_output {{ .Values.PropertyBagContainer }} newTag=${runVarAppVersion}
+            - write_output {{ .Values.PropertyBagContainer }} mvnBINumber=${runVarBINumber}
+
+  - name: distrib_mvn
+    steps:
+      - name: package_app
+        type: packaging/PackageDebian
+        configuration:
+          binaryLocation: "**/multi-module-application*.jar"
+          buildName: backapp_mvn
+          buildNumber: ${res_{{ .Values.PropertyBagContainer }}_mvnBINumber}
+          appExtension: "jar"
+          debianPkgName: "ninja"
+          debianBuildName: "webapp-debian"
+          targetDebianRepo: "ninja-release-debian"
+          propsToSet: "app.version=${res_{{ .Values.PropertyBagContainer }}_newTag};app.name=ninja"
+          integrations:
+            - name: {{ .Values.ArtifactoryIntegration }}
+          inputResources: 
+            - name: {{ .Values.PropertyBagContainer }}
+          outputResources:
+            - name: aql_distrib_debian
+        execution:
+          onStart: 
+            - add_run_variables runVarAppVersion=${res_{{ .Values.PropertyBagContainer }}_newTag}
+            - echo ${runVarAppVersion}
+
+      - name: init_rb_debian_mvn
+        type: CreateReleaseBundle 
+        configuration:
+          releaseBundleName: java-webapp 
+          releaseBundleVersion: ${runVarAppVersion} 
+          dryRun: false
+          sign: true 
+          description: automatic creation 
+          releaseNotes:
+            syntax: markdown
+            content: |
+              # Description 
+              super release 
+              * Feature 1 
+              * Bigfix 1
+          inputResources:
+            - name: aql_distrib_debian
+          outputResources:
+            - name: rb_mvn_debian 
+
+      - name: distribute_mvn_debian
+        type: DistributeReleaseBundle
+        configuration:
+          dryRun: false 
+          inputResources:
+            - name: rb_mvn_debian 
+              trigger: true   
+            - name: dr_mvn_debian 
+              trigger: true  
