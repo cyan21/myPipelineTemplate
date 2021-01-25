@@ -307,6 +307,8 @@ pipelines:
           status: {{ .Values.BuildInfoContainerPromotion.status }}
           comment: {{ .Values.BuildInfoContainerPromotion.comment }}
           copy: {{ .Values.BuildInfoContainerPromotion.copy }}
+          inputSteps:
+            - name: {{ .Values.XrayMvnContainerStepName }}
           inputResources:
             - name: {{ .Values.BuildInfoContainer.resourceName }}
           outputResources:
