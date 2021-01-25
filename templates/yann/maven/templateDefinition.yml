@@ -199,23 +199,6 @@ pipelines:
             - echo "{{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json"
             - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
 
-      - name: {{ .Values.BuildInfoContainerPromotion.resourceName }}
-        type: PromoteBuild
-        configuration:
-          targetRepository: {{ .Values.BuildInfoContainerPromotion.mvnPromoteRepo }} 
-          includeDependencies: {{ .Values.BuildInfoContainerPromotion.includeDependencies }}
-          status: {{ .Values.BuildInfoContainerPromotion.status }}
-          comment: {{ .Values.BuildInfoContainerPromotion.comment }}
-          copy: {{ .Values.BuildInfoContainerPromotion.copy }}
-          inputResources:
-            - name: {{ .Values.BuildInfoContainer.resourceName }}
-          outputResources:
-            - name: {{ .Values.PropertyBagContainer }}            
-            - name: {{ .Values.BuildInfoContainerPromotion.resourceName }}
-        execution:  
-          onSuccess:
-            - write_output {{ .Values.PropertyBagContainer }} newTag=${runVarAppVersion}
-
     {{- else }}
       - name: {{ .Values.DockerBuild.stepName | default "build_backapp_mvn_docker" }} 
         type: DockerBuild
@@ -260,3 +243,19 @@ pipelines:
 
     {{- end }}
 
+      - name: {{ .Values.BuildInfoContainerPromotion.resourceName }}
+        type: PromoteBuild
+        configuration:
+          targetRepository: {{ .Values.BuildInfoContainerPromotion.mvnPromoteRepo }} 
+          includeDependencies: {{ .Values.BuildInfoContainerPromotion.includeDependencies }}
+          status: {{ .Values.BuildInfoContainerPromotion.status }}
+          comment: {{ .Values.BuildInfoContainerPromotion.comment }}
+          copy: {{ .Values.BuildInfoContainerPromotion.copy }}
+          inputResources:
+            - name: {{ .Values.BuildInfoContainer.resourceName }}
+          outputResources:
+            - name: {{ .Values.PropertyBagContainer }}            
+            - name: {{ .Values.BuildInfoContainerPromotion.resourceName }}
+        execution:  
+          onSuccess:
+            - write_output {{ .Values.PropertyBagContainer }} newTag=${runVarAppVersion}
