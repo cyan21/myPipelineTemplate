@@ -241,6 +241,14 @@ pipelines:
             - echo "{{ .Values.DockerPush.stepName }}/backapp-mvn/${runVarAppVersion}/manifest.json"
             - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.DockerPush.stepName }}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
 
+      - name: {{ .Values.XrayMvnContainerStepName }}
+        type: XrayScan
+        configuration:
+          failOnScan: false
+          inputResources:
+            - name: {{ .Values.BuildInfoContainer.resourceName }}
+              trigger: true
+
     {{- end }}
 
       - name: {{ .Values.BuildInfoContainerPromotion.resourceName }}
