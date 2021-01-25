@@ -85,7 +85,6 @@ DockerBuild:
   dockerFileName: Dockerfile
   dockerFileLocation: complete/CI/Docker/
   imageName: ninja-docker.artifactory-eu-yannc4-0.soleng-emea-staging.jfrog.team/backapp-mvn
-  pushImage: true
   artifactoryTargetRepoName: ninja-dev-docker-local
 
 BuildInfoContainer:

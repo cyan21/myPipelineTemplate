@@ -241,22 +241,22 @@ pipelines:
             - cp ${res_{{ .Values.FileSpecMvn.name }}_resourcePath}/multi-module-application-${runVarAppVersion}.jar ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}/complete/CI/Docker/multi-module-application.jar
             - ls -la ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}/complete/CI/Docker/
             - add_run_variables runVarGitCommit=${res_{{ .Values.GitRepoContainer.name }}_commitSha}
-      - name: publish_backapp_mvn_docker
+      - name: {{ .Values.DockerPush.stepName | default "publish_backapp_mvn_docker" }} 
         type: DockerPush
         configuration:
           affinityGroup: together
-          targetRepository: ${envVarDockerPushRepo}
+          targetRepository: {{ .Values.DockerBuild.artifactoryTargetRepoName }}
           autoPublishBuildInfo: true
           inputSteps:
-            - name: build_backapp_mvn_docker
+            - name: {{ .Values.DockerBuild.stepName }}
           integrations:
-            - name: artifactory_eu
+            - name: {{ .Values.ArtifactoryIntegration }}
           outputResources:
-            - name: bi_backapp_mvn_docker
+            - name: {{ .Values.BuildInfoContainer.resourceName }}
         execution:
           onSuccess:
-            - echo "${envVarDockerPushRepo}/backapp-mvn/${runVarAppVersion}/manifest.json"
-            - jfrog rt sp --build=${res_bi_backapp_mvn_docker_buildName}/${run_number} ${envVarDockerPushRepo}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
+            - echo "{{ .Values.DockerPush.stepName }}/backapp-mvn/${runVarAppVersion}/manifest.json"
+            - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.DockerPush.stepName }}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
 
     {{- end }}
 
