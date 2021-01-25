@@ -157,7 +157,7 @@ pipelines:
             - add_run_variables runVarBINumber=${res_{{ .Values.PropertyBagMvn }}_biNumber}
      
     {{- if .Values.OCIPipeline }}
-      - name: {{ .Values.OCIBuild.stepName | default "backapp_mvn_oci" }} 
+      - name: {{ .Values.OCIBuild.stepName | default "build_backapp_mvn_oci" }} 
         type: oci/PodmanBuild
         configuration:
           affinityGroup: together
@@ -215,31 +215,32 @@ pipelines:
         execution:  
           onSuccess:
             - write_output {{ .Values.PropertyBagContainer }} newTag=${runVarAppVersion}
+
     {{- else }}
-      - name: build_backapp_mvn_docker
+      - name: {{ .Values.DockerBuild.stepName | default "build_backapp_mvn_docker" }} 
         type: DockerBuild
         configuration:
           affinityGroup: together
-          dockerFileName: Dockerfile
-          dockerFileLocation: complete/CI/Docker/
-          dockerImageName: ${envVarDockerImageName}
-          dockerImageTag: '${runVarAppVersion}'
-          dockerOptions: --build-arg JFROG_CLI_BUILD_URL=${int_artifactory_eu_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=jfrog-ode
+          dockerFileName: {{ .Values.DockerBuild.dockerFileName }}
+          dockerFileLocation: {{ .Values.DockerBuild.dockerFileLocation }}
+          dockerImageName: {{ .Values.DockerBuild.imageName }}
+          dockerImageTag: ${runVarAppVersion}
+          dockerOptions: --build-arg JFROG_CLI_BUILD_URL=${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=${res_{{ .Values.GitRepoContainer.name }}_branchName
           inputSteps:
             - name: setup_env
           inputResources:
-            - name: src_dockerfile_backapp_mvn
-            - name: fs_backapp_mvn
+            - name: {{ .Values.GitRepoContainer.name }}
+            - name: {{ .Values.FileSpecMvn.name }}
           integrations:
-            - name: artifactory_eu
+            - name: {{ .Values.ArtifactoryIntegration }}
         execution:
           onStart:
-            - ls -la ${res_fs_backapp_mvn_resourcePath}
-            - echo ${res_src_dockerfile_backapp_mvn_resourcePath}
-            - ls -la  ${res_src_dockerfile_backapp_mvn_resourcePath}
-            - cp ${res_fs_backapp_mvn_resourcePath}/multi-module-application-${runVarAppVersion}.jar ${res_src_dockerfile_backapp_mvn_resourcePath}/complete/CI/Docker/multi-module-application.jar
-            - ls -la ${res_src_dockerfile_backapp_mvn_resourcePath}/complete/CI/Docker/
-            - add_run_variables runVarGitCommit=${res_src_dockerfile_backapp_mvn_commitSha}
+            - ls -la ${res_{{ .Values.FileSpecMvn.name }}_resourcePath}
+            - echo ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}
+            - ls -la  ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}
+            - cp ${res_{{ .Values.FileSpecMvn.name }}_resourcePath}/multi-module-application-${runVarAppVersion}.jar ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}/complete/CI/Docker/multi-module-application.jar
+            - ls -la ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}/complete/CI/Docker/
+            - add_run_variables runVarGitCommit=${res_{{ .Values.GitRepoContainer.name }}_commitSha}
       - name: publish_backapp_mvn_docker
         type: DockerPush
         configuration:
