@@ -145,7 +145,7 @@ pipelines:
             - name: {{ .Values.PropertyBagMvn }}
         execution:
           onExecute:
-          {{- if .Values.OCIPipeline }}
+          {{- if not .Values.OCIPipeline }}
             - sudo mkdir -p /etc/docker 
             - > 
               sudo jq -n  "{\"insecure-registries\": [\"${envVarDockerRepoUrl}\"]}" > /etc/docker/daemon.json
