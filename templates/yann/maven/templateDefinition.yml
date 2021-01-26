@@ -196,8 +196,8 @@ pipelines:
             - sudo mkdir -p /etc/docker 
             - > 
               sudo jq -n  "{\"insecure-registries\": [\"{{ .Values.DockerBuild.registry }}\"]}" > /etc/docker/daemon.json
-            - sudo systemctl restart docker
             - sudo cat /etc/docker/daemon.json
+            - sudo systemctl restart docker
           {{- end }}
             - add_run_variables runVarAppVersion=${res_{{ .Values.PropertyBagMvn }}_appVersion}
             - add_run_variables runVarAppCommitSHA=${res_{{ .Values.PropertyBagMvn }}_appCommitSHA}
