@@ -202,6 +202,8 @@ pipelines:
             - add_run_variables runVarAppVersion=${res_{{ .Values.PropertyBagMvn }}_appVersion}
             - add_run_variables runVarAppCommitSHA=${res_{{ .Values.PropertyBagMvn }}_appCommitSHA}
             - add_run_variables runVarBINumber=${res_{{ .Values.PropertyBagMvn }}_biNumber}
+          onFailure:
+            - journalctl -xe
      
     {{- if .Values.OCIPipeline }}
       - name: {{ .Values.OCIBuild.stepName | default "build_backapp_mvn_oci" }} 
