@@ -195,7 +195,7 @@ pipelines:
           {{- if not .Values.OCIPipeline }}
             - sudo mkdir -p /etc/docker 
             - > 
-              sudo jq -n  "{\"insecure-registries\": [\"${envVarDockerRepoUrl}\"]}" > /etc/docker/daemon.json
+              sudo jq -n  "{\"insecure-registries\": [\"{{ .Values.DockerBuild.registry }}\"]}" > /etc/docker/daemon.json
             - sudo systemctl restart docker
             - sudo cat /etc/docker/daemon.json
           {{- end }}
@@ -214,7 +214,7 @@ pipelines:
             type: host
           dockerFileName: {{ .Values.OCIBuild.dockerFileName }}
           dockerFileLocation: {{ .Values.OCIBuild.dockerFileLocation }}
-          ociImageName: {{ .Values.OCIBuild.imageName }}
+          ociImageName: "{{ .Values.OCIBuild.registry }}/{{ .Values.OCIBuild.imageName }}"
           ociImageTag: ${runVarAppVersion}
           pushImage: {{ .Values.OCIBuild.pushImage }}
           artifactoryTargetRepoName: {{ .Values.OCIBuild.artifactoryTargetRepoName }}
@@ -254,7 +254,7 @@ pipelines:
           affinityGroup: together
           dockerFileName: {{ .Values.DockerBuild.dockerFileName }}
           dockerFileLocation: {{ .Values.DockerBuild.dockerFileLocation }}
-          dockerImageName: {{ .Values.DockerBuild.imageName }}
+          dockerImageName: "{{ .Values.DockerBuild.registry }}/{{ .Values.DockerBuild.imageName }}"
           dockerImageTag: ${runVarAppVersion}
           dockerOptions: --build-arg JFROG_CLI_BUILD_URL=${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=${res_{{ .Values.GitRepoContainer.name }}_branchName
           inputSteps:
