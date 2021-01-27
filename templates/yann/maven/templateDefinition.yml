@@ -107,7 +107,7 @@ resources:
           output: "ninja-debian-release-local/pool/$1"
         - name: docker
           input: "ninja-rc-docker-local/(.*)"
-          output: "ninja-release-docker-local/$1"
+          output: "ninja-docker-release-local/$1"
 
   - name: dr_mvn_debian 
     type: DistributionRule
