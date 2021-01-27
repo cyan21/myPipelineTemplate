@@ -246,8 +246,8 @@ pipelines:
             - ls -la ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}/complete/CI/Docker/
             - add_run_variables runVarGitCommit=${res_{{ .Values.GitRepoContainer.name }}_commitSha}  
           onSuccess:
-            - echo "{{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json"
-            - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.OCIBuild.artifactoryTargetRepoName }}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
+            - echo "{{ .Values.OCIBuild.artifactoryTargetRepoName }}/{{ .Values.OCIBuild.imageName }}/${runVarAppVersion}/manifest.json"
+            - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.OCIBuild.artifactoryTargetRepoName }}/{{ .Values.OCIBuild.imageName }}/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
 
     {{- else }}
       - name: {{ .Values.DockerBuild.stepName | default "build_backapp_mvn_docker" }} 
@@ -288,8 +288,7 @@ pipelines:
             - name: {{ .Values.BuildInfoContainer.resourceName }}
         execution:
           onSuccess:
-            - echo "{{ .Values.DockerPush.stepName }}/backapp-mvn/${runVarAppVersion}/manifest.json"
-            - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.DockerPush.stepName }}/backapp-mvn/${runVarAppVersion}/manifest.json "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit}"
+            - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.DockerBuild.artifactoryTargetRepoName }}/{{ .Values.DockerBuild.imageName }}/${runVarAppVersion}/ "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit};app.name=ninja"
 
       - name: {{ .Values.XrayMvnContainerStepName }}
         type: XrayScan
