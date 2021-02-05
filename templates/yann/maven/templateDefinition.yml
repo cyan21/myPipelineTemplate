@@ -280,6 +280,9 @@ pipelines:
             - cp ${res_{{ .Values.FileSpecMvn.name }}_resourcePath}/multi-module-application-${runVarAppVersion}.jar ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}/complete/CI/Docker/multi-module-application.jar
             - ls -la ${res_{{ .Values.GitRepoContainer.name }}_resourcePath}/complete/CI/Docker/
             - add_run_variables runVarGitCommit=${res_{{ .Values.GitRepoContainer.name }}_commitSha}
+            - add_run_variables runBranchName=${res_{{ .Values.GitRepoContainer.name }}_branchName}
+            - echo $runBranchName
+
       - name: {{ .Values.DockerPush.stepName | default "publish_backapp_mvn_docker" }} 
         type: DockerPush
         configuration:
@@ -293,6 +296,8 @@ pipelines:
           outputResources:
             - name: {{ .Values.BuildInfoContainer.resourceName }}
         execution:
+          onStart:
+            - export JFROG_CLI_BUILD_URL="${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/ui}/pipelines/myPipelines/{{ .Values.BuildInfoContainer.resourceName }}/${run_number}/setup_env?branch=${runBranchName}"
           onSuccess:
             - jfrog rt sp --build=${res_{{ .Values.BuildInfoContainer.resourceName }}_buildName}/${run_number} {{ .Values.DockerBuild.artifactoryTargetRepoName }}/{{ .Values.DockerBuild.imageName }}/${runVarAppVersion}/ "app.version=${runVarAppVersion};app.commit.sha=${runVarAppCommitSHA};dockerfile.commit.sha=${runVarGitCommit};app.name=ninja"
 
