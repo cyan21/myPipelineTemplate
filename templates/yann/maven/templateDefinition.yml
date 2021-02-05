@@ -141,8 +141,8 @@ pipelines:
           onStart:
             - export JFROG_CLI_BUILD_URL="${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/ui}/pipelines/myPipelines/${pipeline_name}/${run_number}/build_${pipeline_name}?branch=${res_{{ .Values.GitRepoMvn.name }}_branchName}"
             - cd ${res_{{ .Values.GitRepoMvn.name }}_resourcePath}/complete/CI/jfrog
-            - echo ${res_{{ .Values.GitRepoMvn.name }}_branchName}
-            - git checkout ${res_{{ .Values.GitRepoMvn.name }}_branchName}
+            - echo {{ .Values.GitRepoMvn.branches.include }}
+            - git checkout {{ .Values.GitRepoMvn.branches.include }}
             - git branch
             - ls -l && chmod +x init_mvn.sh
             - ./init_mvn.sh -u  ${int_{{ .Values.ArtifactoryIntegration }}_url/%artifactory/} -p ${int_{{ .Values.ArtifactoryIntegration }}_apikey} -e "{{ .Values.EdgeUrl }}" -i {{ .Values.ArtifactoryIntegration }} -v {{ .Values.MvnRepo }}
