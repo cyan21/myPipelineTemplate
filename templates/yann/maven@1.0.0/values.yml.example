@@ -1,0 +1,136 @@
+##########################################
+## INPUT 
+##########################################
+
+MvnRepo: ninja-dev-mvn
+EdgeUrl: 'http://edge-us-yannc4-0.soleng-emea-staging.jfrog.team:80'
+OCIPipeline: false
+
+##########################################
+## GLOBAL 
+##########################################
+
+ArtifactoryIntegration: artifactory_eu
+
+Pipeline:
+  mvnNname: backapp_mvn
+  mvnContainerName: backapp_mvn_docker
+  # mvnContainerName: backapp_mvn_oci
+
+##########################################
+## MVN Pipeline
+##########################################
+
+GitRepoMvn:
+  name: src_code_backapp_mvn
+  gitProvider: yann_github
+  path: cyan21/gs-multi-module
+  branches:
+    exclude: 'master'
+    include: 'jfrog'
+  files:
+    exclude: '^complete\/CI\/.+'
+    include: '^complete\/.+'
+
+MvnBuild:
+  stepName: build_backapp_mvn
+  goals: "clean package"
+  sourceLocation:       complete/
+  configFileLocation:   CI
+  configFileName:       mvn-art-config
+  forceXrayScan:        false
+  autoPublishBuildInfo: true
+
+XrayMvnStepName: scan_backapp_mvn
+
+BuildInfoMvn:
+  resourceName: bi_backapp_mvn
+  name: backapp_mvn
+  autoPublishBuildInfo: true
+
+BuildInfoMvnPromotion:
+  resourceName: bi_backapp_mvn_promoted_staging
+  stepName: promote_bi_backapp_mvn
+  includeDependencies: false
+  status: SANDBOX_OK
+  comment: Unit testing and Xray scan passed succesfully
+  copy: false
+  mvnPromoteRepo: ninja-rc-mvn-local
+
+FileSpecMvn:
+  name: fs_backapp_mvn
+  appName: multi-module-application 
+  flat: true
+
+PropertyBagMvn: pb_backapp_mvn
+
+##########################################
+## CONTAINER PIPELINE
+##########################################
+
+GitRepoContainer:
+  name: src_dockerfile_backapp_mvn
+  gitProvider: yann_github
+  path: cyan21/gs-multi-module
+  branches:
+    exclude: 'master'
+    include: 'jfrog'
+  files:
+    include: '^complete\/CI\/Docker\/.+'
+
+PropertyBagContainer: pb_backapp_mvn_container
+
+
+## DOCKER PIPELINE
+
+
+DockerBuild:
+  stepName: backapp_mvn_docker
+  dockerFileName: Dockerfile
+  dockerFileLocation: complete/CI/Docker/
+  registry: ninja-docker.artifactory-eu-yannc4-0.soleng-emea-staging.jfrog.team:80
+  imageName: backapp-mvn-docker
+  artifactoryTargetRepoName: ninja-dev-docker-local
+
+BuildInfoContainer:
+  resourceName: bi_backapp_mvn_docker
+  name: backapp_mvn_docker
+#  autoPublishBuildInfo: true
+
+BuildInfoContainerPromotion:
+  resourceName: bi_backapp_mvn_docker_promoted
+  stepName: promote_bi_backapp_mvn_docker
+  includeDependencies: false
+  status: SCAN_OK
+  comment: Xray scan OK 
+  copy: false
+  mvnPromoteRepo: ninja-rc-docker-local
+
+XrayMvnContainerStepName: scan_backapp_mvn_docker
+
+## OCI PIPELINE
+
+# OCIBuild:
+#   stepName: backapp_mvn_oci
+#   dockerFileName: Dockerfile
+#   dockerFileLocation: complete/CI/Docker/
+#   registry: ninja-docker.artifactory-eu-yannc4-0.soleng-emea-staging.jfrog.team:80/
+#   imageName: backapp-mvn
+#   pushImage: true
+#   artifactoryTargetRepoName: ninja-dev-docker-local
+
+# BuildInfoContainer:
+#   resourceName: bi_backapp_mvn_oci
+#   name: backapp_mvn_oci
+#   autoPublishBuildInfo: true
+
+# BuildInfoContainerPromotion:
+#   resourceName: bi_backapp_mvn_oci_promoted
+#   stepName: promote_bi_backapp_mvn_oci
+#   includeDependencies: false
+#   status: SANDBOX_OK
+#   comment: passed my test succesfully
+#   copy: false
+#   mvnPromoteRepo: ninja-rc-docker-local
+
+
