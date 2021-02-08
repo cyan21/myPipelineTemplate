@@ -100,13 +100,13 @@ resources:
         distribution: "automatic"
       mappings:
         - name: java
-          input: "ninja-rc-mvn-local/(.*)"
+          input: "ninja-mvn-rc-local/(.*)"
           output: "ninja-mvn-release-local/$1"
         - name: debian
-          input: "ninja-release-debian-local/pool/(.*)"
+          input: "ninja-debian-release-local/pool/(.*)"
           output: "ninja-debian-release-local/pool/$1"
         - name: docker
-          input: "ninja-rc-docker-local/(.*)"
+          input: "ninja-docker-rc-local/(.*)"
           output: "ninja-docker-release-local/$1"
 
   - name: dr_mvn_debian 
