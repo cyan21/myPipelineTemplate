@@ -342,7 +342,7 @@ pipelines:
           appExtension: "jar"
           debianPkgName: "ninja"
           debianBuildName: "webapp-debian"
-          targetDebianRepo: "ninja-release-debian"
+          targetDebianRepo: "ninja-debian-release"
           propsToSet: "app.version=${res_{{ .Values.PropertyBagContainer }}_newTag};app.name=ninja"
           integrations:
             - name: {{ .Values.ArtifactoryIntegration }}
