@@ -1,0 +1,100 @@
+resources:
+
+  - name: {{ .Values.DemoAppDistributionResources.buildInfo.resourceName }}
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: {{ .Values.DemoApp.artifactoryIntegration }}
+      buildName: $runVarDockerBuildName
+      buildNumber: runVarDockerBuildNumber
+
+  - name: {{ .Values.DemoAppDistributionResources.releaseBundle.resourceName }}
+    type: ReleaseBundle
+    configuration:
+      sourceDistribution: {{ .Values.DemoApp.distributionIntegration }}
+      name: {{ .Values.DemoAppDistributionResources.releaseBundle.name }}
+      version: "1"          # will be overriden by the CreateReleaseBundle step 
+      isSigned: true
+
+  - name: {{ .Values.DemoAppDistributionResources.aql.name }}
+    type: Aql
+    configuration:
+      sourceArtifactory: {{ .Values.DemoApp.artifactoryIntegration }}
+      query: > 
+        items.find({
+          "@app.version": "${runVarAppVersion}"},
+          "@app.name": "${runVarAppName}"
+        ]})
+      addedProperties:
+        distribution: "automatic"
+##### TO TEMPLATIZE
+      mappings:
+        - name: python
+          input: "urs-generic-release-local/(.*)"
+          output: "release-generic-local/$1"
+        # - name: debian
+        #   input: "ninja-debian-release-local/pool/(.*)"
+        #   output: "ninja-debian-release-local/pool/$1"
+        - name: docker
+          input: "urs-docker-release-local/(.*)"
+          output: "release-docker-local/$1"
+
+  - name: {{ .Values.DemoAppDistributionResources.distributionRule.name }} 
+    type: DistributionRule
+    configuration:
+      sourceDistribution: {{ .Values.DemoApp.distributionIntegration }}
+##### TO TEMPLATIZE
+      serviceName: "*"         
+      siteName: "*"
+      cityName: "*"
+      countryCodes:
+        - "LA"
+
+pipelines:
+  - name: {{ .Values.DemoApp.pipelineName }}
+    steps:
+      - name: {{ .Values.DemoAppDistributionSteps.export.name }}
+        type: Bash
+        configuration:
+          inputResources:
+            - name: {{ .Values.DemoAppContainerResources.webhook.name }}
+          outputResources:
+            - name: {{ .Values.DemoAppDistributionResources.aql.name }}
+        execution:
+          onExecute:
+            - echo "$res_{{ .Values.DemoAppContainerResources.webhook.name }}_payload"
+            - add_run_variables runVarAppName=`read_json ${res_{{ .Values.DemoAppContainerResources.webhook.name }}_payload} appName`
+            - add_run_variables runVarAppVersion=`read_json ${res_{{ .Values.DemoAppContainerResources.webhook.name }}_payload} appVersion`
+            - add_run_variables runVarDockerBuildName=`read_json ${res_{{ .Values.DemoAppContainerResources.webhook.name }}_payload} DockerBuildName`
+            - add_run_variables runVarDockerBuildNumber=`read_json ${res_{{ .Values.DemoAppContainerResources.webhook.name }}_payload} buildNumber`
+            - echo $dockerBuildName $dockerBuildNumber
+
+      - name: {{ .Values.DemoAppDistributionSteps.createRB.name }}
+        type: CreateReleaseBundle 
+        configuration:
+          releaseBundleName: {{ .Values.DemoApp.releaseBundleName }} 
+          releaseBundleVersion: ${runVarAppVersion} 
+          sign: true
+          dryRun: {{ .Values.DemoAppDistributionResources.releaseBundle.dryRun.create }}
+          description: automatic creation 
+          releaseNotes:
+            syntax: markdown
+            content: |
+              # Description 
+              super release 
+              * Feature 1 
+              * Bigfix 1
+          inputResources:
+            - name: {{ .Values.DemoAppDistributionResources.aql.name }}
+            - name: {{ .Values.DemoAppDistributionResources.buildInfo.resourceName }}
+          outputResources:
+            - name: {{ .Values.DemoAppDistributionResources.releaseBundle.resourceName }} 
+
+      # - name: {{ .Values.DemoAppDistributionSteps.distributeRB.name }}
+      #   type: DistributeReleaseBundle
+      #   configuration:
+      #     dryRun: {{ .Values.DemoAppDistributionResources.releaseBundle.dryRun.distribute }} 
+      #     inputResources:
+      #       - name: {{ .Values.DemoAppDistributionResources.distributionRule.name }}
+      #         trigger: true   
+      #       - name: {{ .Values.DemoAppDistributionResources.releaseBundle.resourceName }}  
+      #         trigger: true
