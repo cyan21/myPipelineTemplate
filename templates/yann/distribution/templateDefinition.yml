@@ -51,12 +51,13 @@ resources:
     type: DistributionRule
     configuration:
       sourceDistribution: {{ .Values.DemoApp.distributionIntegration }}
-##### TO TEMPLATIZE
       serviceName: "*"         
       siteName: "*"
       cityName: "*"
       countryCodes:
-        - "LA"
+      {{- range .Values.DemoAppDistributionResources.distributionRule.countryCodes }}
+        - "{{ . }}"
+      {{- end }} 
 
 pipelines:
   - name: {{ .Values.DemoApp.pipelineName }}
