@@ -31,17 +31,21 @@ resources:
         })
       addedProperties:
         distribution: "automatic"
-##### TO TEMPLATIZE
       mappings:
-        - name: python
-          input: "urs-generic-release-local/(.*)"
-          output: "release-generic-local/$1"
+      {{- range .Values.DemoAppDistributionResources.aql.mapping }}
+        - name: .name
+          input: .input
+          output: .output
+        # - name: python
+        #   input: "urs-generic-release-local/(.*)"
+        #   output: "release-generic-local/$1"
         # - name: debian
         #   input: "ninja-debian-release-local/pool/(.*)"
         #   output: "ninja-debian-release-local/pool/$1"
-        - name: docker
-          input: "urs-docker-release-local/(.*)"
-          output: "release-docker-local/$1"
+        # - name: docker
+        #   input: "urs-docker-release-local/(.*)"
+        #   output: "release-docker-local/$1"
+      {{- end }} 
 
   - name: {{ .Values.DemoAppDistributionResources.distributionRule.name }} 
     type: DistributionRule
