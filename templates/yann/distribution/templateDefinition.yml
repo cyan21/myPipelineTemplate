@@ -26,9 +26,9 @@ resources:
       sourceArtifactory: {{ .Values.DemoApp.artifactoryIntegration }}
       query: > 
         items.find({
-          "@app.version": "${runVarAppVersion}"},
+          "@app.version": "${runVarAppVersion}",
           "@app.name": "${runVarAppName}"
-        ]})
+        })
       addedProperties:
         distribution: "automatic"
 ##### TO TEMPLATIZE
