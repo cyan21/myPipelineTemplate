@@ -56,7 +56,7 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: {{ .Values.DemoAppContainerResources.webhook.name }}
+            - name: {{ .Values.DemoAppDistributionResources.webhook.name }}
           outputResources:
             - name: {{ .Values.DemoAppDistributionResources.aql.name }}
         execution:
@@ -85,7 +85,7 @@ pipelines:
               * Bigfix 1
           inputResources:
             - name: {{ .Values.DemoAppDistributionResources.aql.name }}
-            - name: {{ .Values.DemoAppDistributionResources.buildInfo.resourceName }}
+            # - name: {{ .Values.DemoAppDistributionResources.buildInfo.resourceName }}
           outputResources:
             - name: {{ .Values.DemoAppDistributionResources.releaseBundle.resourceName }} 
 
