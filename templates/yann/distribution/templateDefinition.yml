@@ -1,5 +1,10 @@
 resources:
 
+  - name: {{ .Values.DemoAppDistributionResources.webhook.name }}
+    type: IncomingWebhook
+    configuration:
+      webhookName:  {{ .Values.DemoApp.webhookIntegration }}
+
   - name: {{ .Values.DemoAppDistributionResources.buildInfo.resourceName }}
     type: BuildInfo
     configuration:
