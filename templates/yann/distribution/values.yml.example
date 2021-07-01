@@ -1,6 +1,5 @@
 DemoApp:
   pipelineName: demo_distribute_java
-  releaseBundleName: iot-demo
   artifactoryIntegration: artifactory_eu
   distributionIntegration: distribution_eu
 

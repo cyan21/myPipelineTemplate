@@ -71,7 +71,7 @@ pipelines:
       - name: {{ .Values.DemoAppDistributionSteps.createRB.name }}
         type: CreateReleaseBundle 
         configuration:
-          releaseBundleName: {{ .Values.DemoApp.releaseBundleName }} 
+          releaseBundleName: {{ .Values.DemoAppDistributionResources.releaseBundle.name }} 
           releaseBundleVersion: ${runVarAppVersion} 
           sign: true
           dryRun: {{ .Values.DemoAppDistributionResources.releaseBundle.dryRun.create }}
