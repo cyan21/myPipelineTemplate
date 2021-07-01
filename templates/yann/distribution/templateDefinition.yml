@@ -33,9 +33,9 @@ resources:
         distribution: "automatic"
       mappings:
       {{- range .Values.DemoAppDistributionResources.aql.mapping }}
-        - name: .name
-          input: .input
-          output: .output
+        - name: {{ .name }}
+          input: {{ .input }}
+          output: {{ .output }}
         # - name: python
         #   input: "urs-generic-release-local/(.*)"
         #   output: "release-generic-local/$1"
