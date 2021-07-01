@@ -67,10 +67,10 @@ pipelines:
         execution:
           onExecute:
             - echo "$res_{{ .Values.DemoAppDistributionResources.webhook.name }}_payload" > payload.json
-            - add_run_variables runVarAppName=`read_json payload.json ${res_{{ .Values.DemoAppDistributionResources.webhook.name }}_payload} appName`
-            - add_run_variables runVarAppVersion=`read_json payload.json ${res_{{ .Values.DemoAppDistributionResources.webhook.name }}_payload} appVersion`
-            - add_run_variables runVarDockerBuildName=`read_json payload.json ${res_{{ .Values.DemoAppDistributionResources.webhook.name }}_payload} DockerBuildName`
-            - add_run_variables runVarDockerBuildNumber=`read_json payload.json ${res_{{ .Values.DemoAppDistributionResources.webhook.name }}_payload} buildNumber`
+            - add_run_variables runVarAppName=`read_json payload.json ${res_{{ .Values.DemoAppDistributionResources.webhook.name }}_payload} "appName"`
+            - add_run_variables runVarAppVersion=`read_json payload.json ${res_{{ .Values.DemoAppDistributionResources.webhook.name }}_payload} "appVersion"`
+            - add_run_variables runVarDockerBuildName=`read_json payload.json ${res_{{ .Values.DemoAppDistributionResources.webhook.name }}_payload} "DockerBuildName"`
+            - add_run_variables runVarDockerBuildNumber=`read_json payload.json ${res_{{ .Values.DemoAppDistributionResources.webhook.name }}_payload} "buildNumber"`
             - echo $runVarAppName $runVarAppVersion $runVarDockerBuildName $runVarDockerBuildNumber
 
       - name: {{ .Values.DemoAppDistributionSteps.createRB.name }}
