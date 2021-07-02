@@ -6,11 +6,11 @@ resources:
       gitProvider: {{ .Values.DemoApp.scmIntegration }}
       path: {{ .Values.DemoAppDistributionResources.scm.path }}
       branches:
-        include: {{ .Values.DemoAppDistributionResources.branches.include }}
+        include: {{ .Values.DemoAppDistributionResources.scm.branches.include }}
       files:
-        include: {{ .Values.DemoAppDistributionResources.files.include }}
+        include: {{ .Values.DemoAppDistributionResources.scm.files.include }}
       buildOn:
-         commit: {{ .Values.DemoAppDistributionResources.buildOn.commit }}
+         commit: {{ .Values.DemoAppDistributionResources.scm.buildOn.commit }}
 
   - name: {{ .Values.DemoAppDistributionResources.webhook.name }}
     type: IncomingWebhook
