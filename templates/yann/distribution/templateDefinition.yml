@@ -1,5 +1,17 @@
 resources:
 
+  - name: {{ .Values.DemoAppDistributionResources.scm.name }}
+    type: GitRepo
+    configuration:
+      gitProvider: {{ .Values.DemoApp.scmIntegration }}
+      path: {{ .Values.DemoAppDistributionResources.scm.path }}
+      branches:
+        include: {{ .Values.DemoAppDistributionResources.branches.include }}
+      files:
+        include: {{ .Values.DemoAppDistributionResources.files.include }}
+      buildOn:
+         commit: {{ .Values.DemoAppDistributionResources.buildOn.commit }}
+
   - name: {{ .Values.DemoAppDistributionResources.webhook.name }}
     type: IncomingWebhook
     configuration:
@@ -66,6 +78,7 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
+            - name: {{ .Values.DemoAppDistributionResources.scm.name }}
             - name: {{ .Values.DemoAppDistributionResources.webhook.name }}
           outputResources:
             - name: {{ .Values.DemoAppDistributionResources.aql.name }}
